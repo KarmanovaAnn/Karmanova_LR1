@@ -11,19 +11,14 @@
 
 using namespace std;
 
-struct pipe
-{
+struct pipe{
     string condition;
-    double diameter;
-    double length;
+    double diameter, length;
 };
 
-struct compressor_station
-{
+struct compressor_station{
     string name;
-    double amount_shop;
-    double amount_Wshop;
-    double indicator;
+    double amount_shop, amount_Wshop, indicator;
 };
 
 void showMenu() {
@@ -42,10 +37,9 @@ pipe Add_a_pipe() {
     system("cls");
     pipe p;
     p.condition = "хорошем";
-    string s;
     cout << "Труба в состоянии " << p.condition << endl;
     //диаметр трубы
-    for (;;) {
+    while (true) {
         cout << "Введите диаметр трубы:" << endl;
         cin >> p.diameter;
         if (cin.good()==true) {
@@ -71,7 +65,7 @@ pipe Add_a_pipe() {
         }
     }
     //длина трубы
-    for (;;) {
+    while (true) {
         cout << "Введите длину трубы:" << endl;
         cin >> p.length;
         if (cin.good() == true) {
@@ -100,15 +94,17 @@ pipe Add_a_pipe() {
     return p;
 }
 
-compressor_station Add_a_CS() {   
+compressor_station Add_a_CS() {  
     system("cls");
+    compressor_station cs;
     //имя станции
     cout << "Введите название компрессорной станции:" << endl;
-    compressor_station cs;
-    cin >> cs.name;
-    cout << "Название компрессорной станции: " << " " << cs.name << endl;
+    cin.ignore(1000, '\n');
+    cin.clear();
+    getline(cin, cs.name);
+    cout << "Название компрессорной станции:" << cs.name << endl;
     //количество цехов
-    for (;;) {
+    while (true) {
         cout << "Введите количество цехов компрессорной станции :" << endl;
         cin >> cs.amount_shop;
         if (cin.good() == true) {
@@ -118,7 +114,7 @@ compressor_station Add_a_CS() {
                 cin.ignore(1000, '\n');
             }
             else if (cs.amount_shop == 0) {
-                cout << "Ошибка:количество цехов не может равняться 0" << endl;
+                cout << "Ошибка:количество цехов не может равняться 0, КС не создана" << endl;
                 cin.clear();
                 cin.ignore(1000, '\n');
             }
@@ -139,7 +135,7 @@ compressor_station Add_a_CS() {
         }
     }
     //кол-во рабочих цехов
-    for (;;) {
+    while (true) {
         cout << "Введите количество рабочих цехов компрессорной станции :" << endl;
         cin >> cs.amount_Wshop;
         if (cin.good() == true) {
@@ -170,24 +166,13 @@ compressor_station Add_a_CS() {
         }
     }
     //оценка работы цеха
-    for (;;) {
-        cout << "Введите показатель эффективности:" << endl;
-        cin >> cs.indicator;
-        if (cin.good() == true) {
-            cout << "Показатель эффективности: " << " " << cs.indicator << "%" << endl;
-            break;
-        }
-        else {
-            cout << "Ошибка: введено не число" << endl;
-            cin.clear();
-            cin.ignore(1000, '\n');
-        }
-    }
+    cs.indicator= (cs.amount_Wshop/cs.amount_shop)*100;
+    cout << "Показатель эффективности: " << " " << cs.indicator << "%" << endl;
     system("pause");
     return cs;
 }
 
-void Viewing_pipe(pipe p) {
+void Viewing_pipe(pipe & p) {
     system("cls");
     if ((p.length == 0) || (p.diameter == 0)) {
         cout << "Параметры трубы не введены" << endl << endl;
@@ -200,7 +185,7 @@ void Viewing_pipe(pipe p) {
     }
 }
 
-void Viewing_CS(compressor_station cs) {
+void Viewing_CS(compressor_station & cs) {
     if (cs.amount_shop == 0) {
         cout << "Параметры компрессорной станциии не введены" << endl << endl;
     }
@@ -238,7 +223,7 @@ void Edit_CS(compressor_station & cs) {
     cout << "На данный момент количество рабочих цехов:" << " " << cs.amount_Wshop << endl<< "Вы хотите изменить количество рабочих цехов? Введите 1, если хотите увеличить кол-во, введите 0, если хотите уменьшить" << endl;
     int answer;
     cin >> answer;
-    for (;;) {
+    while (true) {
         if (answer == 1) {
             cs.amount_Wshop = cs.amount_Wshop + 1;
             if (cs.amount_Wshop > cs.amount_shop) {
@@ -310,9 +295,9 @@ void Save(pipe & p , compressor_station & cs) {
         if (!fout.is_open()) {
             cout << "Ошибка! Не удалось открыть файл" << endl;
         }
-        else{
-            cout << "Данные успешно записаны в файл!" << endl;
-            fout << p.condition << endl << p.diameter << endl << p.length << endl<< cs.name << endl<< cs.amount_shop << endl << cs.amount_Wshop << endl<< cs.indicator << endl << endl;
+        else {
+            cout<<"Данные успешно записаны!" << endl;
+            fout << p.condition << endl << p.diameter << endl << p.length << endl << cs.name << endl << cs.amount_shop << endl << cs.amount_Wshop << endl << cs.indicator << endl << endl;  
         }
         fout.close();
     }
@@ -326,28 +311,109 @@ void Download(pipe& p, compressor_station& cs) {
     if (!fin.is_open()) {
         cout << "Ошибка! Не удалось открыть файл" << endl;
     }
+    else if (fin.peek() == EOF) {
+        cout << "Файл пустой" << endl;
+    }
     else {
-        //Труба
-        fin >> p.condition >> p.diameter >> p.length;;
-        //КС
-        fin >> cs.name >> cs.amount_shop >> cs.amount_Wshop >> cs.indicator;
-        if ((cs.amount_shop == 0) && ((p.length == 0) || (p.diameter == 0))) {
-            cout << "Параметры трубы и КС не были введены. " << endl;
-        }
-        else if (cs.amount_shop == 0) {
-            cout << "Параметры трубы:" << endl << "Труба в состоянии " << p.condition << endl << "Диаметр трубы:" << " " << p.diameter << endl << "Длина трубы:" << " " << p.length << endl;
-            cout << "Параметры компрессорной станциии не были введены" << endl;
-        }
-        else if ((p.length == 0) || (p.diameter == 0)) {
-            cout << "Параметры трубы не были введены." << endl;
-            cout << "Параметры компрессорной станции:" << endl << "Название компрессорной станции:" << cs.name << endl << "Количество цехов: " << cs.amount_shop << endl << "Количество рабочих цехов: " << cs.amount_Wshop << endl << "Показатель эффективности рабочих цехов: " << cs.indicator << endl;
+        cout << "Данные успешно загружены из файла!" << endl;
+        //файл испортлися
+        cout << "Параметры трубы:" << endl;
+        //состояние
+        fin >> p.condition;
+        if ((p.condition != "хорошем") && (p.condition != "ремонта")) {
+            cout << "Файл был испорчен" << endl;
         }
         else {
-            cout << "Данные успешно загружены из файла!" << endl;
-            cout << "Параметры трубы:" << endl << "Труба в состоянии " << p.condition << endl << "Диаметр трубы:" << " " << p.diameter << endl << "Длина трубы:" << " " << p.length << endl;
-            cout << "Параметры компрессорной станции:" << endl << "Название компрессорной станции:" << cs.name << endl << "Количество цехов: " << cs.amount_shop << endl << "Количество рабочих цехов: " << cs.amount_Wshop << endl << "Показатель эффективности рабочих цехов: " << cs.indicator << endl;
+            cout << "Труба в состоянии " << p.condition << endl;
         }
-        
+        //диаметр
+        fin >> p.diameter;
+        if (fin.good() == true) {
+            if (p.diameter < 0) {
+                cout << "Файл был испорчен: диаметр - отрицательное число" << endl;
+            }
+            else if (p.diameter == 0) {
+                cout << "Файл был испорчен: диаметр равен 0, труба не создана" << endl;
+            }
+            else {
+                cout << "Диаметр трубы:" << " " << p.diameter << endl;      
+            }
+        }
+        else  {
+            cout << "Файл был испорчен: значение диаметра представлено не числом" << endl;     
+        }
+        //длина
+        fin >> p.length;
+        if (fin.good() == true) {
+            if (p.length < 0) {
+                cout << "Файл был испорчен: длина - отрицательное число" << endl;
+            }
+            else if (p.length == 0) {
+                cout << "Файл был испорчен: длина равен 0, труба не создана" << endl;
+            }
+            else {
+                cout << "Длина трубы:" << " " << p.length << endl;
+            }
+        }
+        else {
+            cout << "Файл был испорчен: значение длины представлено не числом" << endl;
+        }
+        //КС
+        cout << "Параметры компрессорной станции:" << endl;
+        fin.ignore();
+        getline(fin, cs.name);
+        cout << "Название компрессорной станции:" << cs.name<< endl;
+        //кол-во цехов
+        fin >> cs.amount_shop;
+        if (fin.good() == true) {
+            if (cs.amount_shop < 0) {
+                cout << "Файл был испорчен: кол-во цехов - отрицательное число" << endl;
+            }
+            else if (int(cs.amount_shop) != cs.amount_shop) {
+                cout << "Файл был испорчен: кол-во цехов - дробное число" << endl;
+            }
+            else if (cs.amount_shop == 0) {
+                cout << "Файл был испорчен: кол-во цехов равно 0, КС не создана" << endl;
+            }
+            else {
+                cout << "Количество цехов:" << " " << cs.amount_shop << endl;
+                
+            }
+        }
+        else {
+            cout << "Файл был испорчен: значение кол-ва цехов представлено не числом" << endl;
+        }
+        //кол-во рабочих цехов
+        fin >> cs.amount_Wshop;
+        if (fin.good() == true) {
+            if (cs.amount_Wshop < 0) {
+                cout << "Файл был испорчен: кол-во рабочих цехов - отрицательное число" << endl;
+            }
+            else if (cs.amount_Wshop > cs.amount_shop) {
+                cout << "Файл был испорчен: количество рабочих цехов превышает количество цехов" << endl;
+            }
+            else if (int(cs.amount_Wshop) != cs.amount_Wshop) {
+                cout << "Файл был испорчен: кол-во рабочих цехов - дробное число" << endl;
+            }
+            else {
+                cout << "Количество рабочих цехов:" << " " << cs.amount_Wshop << endl;
+            }
+        }
+        else {
+            cout << "Файл был испорчен: значение кол-ва рабочих цехов представлено не числом" << endl;
+        }
+        fin >> cs.indicator;
+        if (fin.good() == true) {
+            if ((cs.indicator < 0) || (cs.indicator > 100)) {
+                cout << "Файл был испорчен: показатель эффективности рабочих цехов находится в недопустимых пределах" << endl;
+            }
+            else {
+                cout << "Показатель эффективности рабочих цехов: " << cs.indicator << endl;
+            }
+        }
+        else {
+            cout << "Файл был испорчен: значение показателя эффективности цехов представлено не числом" << endl;
+        }
     }
     fin.close();
     system("pause");
@@ -355,7 +421,7 @@ void Download(pipe& p, compressor_station& cs) {
 
 void Exit(pipe& p, compressor_station& cs) {
     system("cls");
-    cout << "Вы хотите сохранить текущее данные в файл? Введите 1, если да, введите 0, если нет" << endl;
+    cout << "Вы хотите сохранить текущее данные в файл или очистить его? Введите 1, если да, введите 0, если нет" << endl;
     int answer;
     cin >> answer;
     if (answer == 1) {
@@ -363,12 +429,13 @@ void Exit(pipe& p, compressor_station& cs) {
         fout.open("NewFile.txt", ios::out);
         fout << p.condition << endl << p.diameter << endl << p.length << endl << cs.name << endl << cs.amount_shop << endl << cs.amount_Wshop << endl << cs.indicator << endl << endl;
         cout << "Текущее данные сохранены в файл" << endl;
+        fout.close();
     }
     else {
         ofstream ofs;
-        ofs.open("NewFile.txt", std::ofstream::out | std::ofstream::trunc);
+        ofs.open("NewFile.txt", ofstream::out | ofstream::trunc);
         ofs.close();
-        cout << "Данные не были сохранены в файл" << endl;
+        cout << "Файл был очищен" << endl;
     }
 }
 
